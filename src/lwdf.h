@@ -52,30 +52,50 @@ enum lwdf_type {
 /* max filter order */
 #define LWDF_NMAX 127
 
-struct lwdf_info {
+/* Input to the filter generator */
+struct lwdfwiz_param {
 	double samplerate;
 	uint8_t ftype;
 	uint8_t order;
 	uint8_t nbits;
+	/* bireciprocal filter */
 	bool bi;
+	/* bireciprocal for decimation/interpolation */
 	bool id;
 	bool rx;
+	bool ff;
+	double asmin; 
 	double as; 
 	double es; 
 	double fs;
 	double ap;
+	double ep;
 	double fp;
+};
+
+/* Output from the filter generator */
+struct lwdf_info {
+	double samplerate;
 	double gamma[LWDF_NMAX];	
-	bool ccode;
+};
+
+struct lwdfwiz_cfg {
+	/* Store parameters from the past... */
+	struct lwdfwiz_param wiz;
+	char prefix[32];
+	char cfname[256];
+	char jlfname[256];
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int lwdf_cgen(FILE *fout, const struct lwdf_info * inf);
+/* Terminal/console mode wizard */
+int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf);
 
-int lwdf_wiz(struct lwdf_info * inf);
+int lwdf_cgen(FILE *fout, const struct lwdfwiz_param * wiz, 
+			  const struct lwdf_info * inf);
 
 #ifdef  __cplusplus
 }

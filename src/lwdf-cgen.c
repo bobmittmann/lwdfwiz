@@ -98,14 +98,18 @@ static void adaptor(int i, int t, double g, char *in1, char *in2,
 	} else {
 		if (b) {
 			if (so)
-				fprintf(f, "\t%s = %7s(t%d>>%d) %c %s;\n", out1, "", t, b, pm, in2);
+				fprintf(f, "\t%s = %7s(t%d>>%d) %c %s;\n", 
+						out1, "", t, b, pm, in2);
 			else
-				fprintf(f, "\t%s = %7s(t%d>>%d) %c %s;\n", out2, "", t, b, pm, in2);
+				fprintf(f, "\t%s = %7s(t%d>>%d) %c %s;\n", 
+						out2, "", t, b, pm, in2);
 		} else {
 			if (so)
-				fprintf(f, "\t%s = ((%d*t%d)>>%d) %c %s;\n", out1, aQ, t, nbits, pm, in2);
+				fprintf(f, "\t%s = ((%d*t%d)>>%d) %c %s;\n", 
+						out1, aQ, t, nbits, pm, in2);
 			else
-				fprintf(f, "\t%s = ((%d*t%d)>>%d) %c %s;\n", out2, aQ, t, nbits, pm, in2);
+				fprintf(f, "\t%s = ((%d*t%d)>>%d) %c %s;\n", 
+						out2, aQ, t, nbits, pm, in2);
 		}
 	}
 	if (so)
@@ -115,7 +119,8 @@ static void adaptor(int i, int t, double g, char *in1, char *in2,
 	return;
 }
 
-int lwdf_cgen(FILE *fout, const struct lwdf_info * inf)
+int lwdf_cgen(FILE *fout, const struct lwdfwiz_param * wiz, 
+			  const struct lwdf_info * inf)
 {
 	char in1[16], in2[16], out1[16], out2[16];
 	const char *dtype;
@@ -128,24 +133,23 @@ int lwdf_cgen(FILE *fout, const struct lwdf_info * inf)
 	int i, j, k;
 	int rl[LWDF_NMAX];
 
-	N = inf->order;
-	F = inf->samplerate;
-	ftype = inf->ftype;
+	N = wiz->order;
+	F = wiz->samplerate;
+	ftype = wiz->ftype;
 
 	/* bireciprocal filter (0=no 1=yes)? */
-	bi = inf->bi;
+	bi = wiz->bi;
 	/* bireciprocal for decimation/interpolation (0=no, 1=yes)? */
-	id = inf->id;
+	id = wiz->id;
 	/* bits (not including sign bit, 0=no quantization)? */
-	nbits = inf->nbits;
+	nbits = wiz->nbits;
 	/* reuse and minimize temporary variables (0=no, 1=yes)?  */
-	rx = inf->rx ? 1 : 0;
+	rx = wiz->rx ? 1 : 0;
 
 	if (nbits == 0)
 		dtype = "float";
 	else
 		dtype = "int";
-
 
 	fprintf(fout, "/* -----------------------------------------------------\n");
 	fprintf(fout, " * This file was automatically generated, do not edit!\n");
@@ -171,10 +175,10 @@ int lwdf_cgen(FILE *fout, const struct lwdf_info * inf)
 	}
 	fprintf(fout,
 		" * - stopband min attenuation as=%.0f dB at fs=%.2f%% (100%%=F/2)\n",
-		inf->as, inf->fs / (F / 2.0));
+		wiz->as, wiz->fs / (F / 2.0));
 	fprintf(fout,
 		" * - passband attenuation spread ap=%.2f dB at fp=%.2f%% (100%%=F/2)\n",
-		inf->ap, inf->fp / (F / 2.0));
+		wiz->ap, wiz->fp / (F / 2.0));
 
 	fprintf(fout, " *\n");
 	fprintf(fout, " * -----------------------------------------------------\n");
@@ -198,7 +202,7 @@ int lwdf_cgen(FILE *fout, const struct lwdf_info * inf)
 	}
 	fprintf(fout, "\n");
 
-	if (inf->rx) {
+	if (wiz->rx) {
 		if ((!id) || (N > 1))
 			fprintf(fout, "\t%s t0", dtype);
 		if (id) {
@@ -256,24 +260,6 @@ int lwdf_cgen(FILE *fout, const struct lwdf_info * inf)
 				fprintf(fout, ";\n");
 		}
 	}
-
-/*
-	if ((!id) || (N > 1))
-		fprintf(fout, " " " static %s ", dtype);
-	if (!id) {
-		fprintf(fout, "st[0]");
-		for (i = 1; i <= (N - 1); i++)
-			fprintf(fout, ",T%d", i);
-	} else {
-		if (N > 1)
-			fprintf(fout, "T1");
-		for (i = 3; i < (N - 1); i += 2)
-			fprintf(fout, ",T%d", i);
-	}
-	if ((!id) || (N > 1))
-		fprintf(fout, ";\n\n");
-	
-	*/
 
 	if (id)
 		fprintf(fout, "\t/* interpolator input: i1=i2=sample(n) */\n "

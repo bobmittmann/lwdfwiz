@@ -29,74 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lwdf.h"
-#include "conf.h"
-
-struct {
-	double samplerate;
-	int ftype;
-	int order;
-	int nbits;
-	int bi;
-	int id;
-	int rx;
-	int ff;
-	double asmin; 
-	double as; 
-	double es; 
-	double fs;
-	double ap;
-	double ep;
-	double fp;
-	char prefix[32];
-	char cfname[256];
-	char jlfname[256];
-} lwdf_conf = {
-	.samplerate = 88200,
-	.ftype = LWDF_ELLIP,
-	.order = 13,
-	.nbits = 0,
-	.bi = false,
-	.id = false,
-	.rx = false,
-	.ff = false,
-	.asmin = 6.0,
-	.as = 6.0,
-	.es = 0.0,
-	.fs = 22100.0,
-	.ap = 0.0,
-	.ep = 0.0,
-	.fp = 0.0,
-	.prefix = "lp",
-	.cfname = "test.c",
-	.jlfname = "test.jl"
-};
-
-/*
- * Configuration profile
- */
-/* *INDENT-OFF* */
-BEGIN_SECTION(wiz)
-       DEFINE_FLOAT("samplerate", &lwdf_conf.samplerate)
-       DEFINE_INT("ftype", &lwdf_conf.ftype)
-       DEFINE_INT("nbits", &lwdf_conf.nbits)
-       DEFINE_FLOAT("asmin", &lwdf_conf.asmin)
-       DEFINE_FLOAT("as", &lwdf_conf.as)
-       DEFINE_FLOAT("es", &lwdf_conf.es)
-       DEFINE_FLOAT("fs", &lwdf_conf.fs)
-       DEFINE_FLOAT("ap", &lwdf_conf.ap)
-       DEFINE_FLOAT("ep", &lwdf_conf.ep)
-       DEFINE_FLOAT("fp", &lwdf_conf.fp)
-       DEFINE_BOOLEAN("bi", &lwdf_conf.bi)
-       DEFINE_BOOLEAN("id", &lwdf_conf.id)
-       DEFINE_BOOLEAN("rx", &lwdf_conf.rx)
-       DEFINE_BOOLEAN("ff", &lwdf_conf.ff)
-       DEFINE_STRING("prefix", &lwdf_conf.prefix)
-END_SECTION
-/* *INDENT-ON* */
-
-BEGIN_SECTION(conf_root)
-       DEFINE_SECTION("wizard", &wiz)
-END_SECTION
 
 int readln(char * buf, unsigned int max);
 
@@ -152,9 +84,7 @@ int input_int(const char * prompt, int * pval)
 	return 1;
 }
 
-const char *confpath = ".lwd_wiz.conf";
-
-int lwdf_wiz(struct lwdf_info * inf)
+int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 {
 	char s[1024];
 	int ftype;
@@ -182,6 +112,22 @@ int lwdf_wiz(struct lwdf_info * inf)
 	/* filter coefficients */
 	double gamma[LWDF_NMAX];	
 
+	/* Get default values ... */
+	ftype = wiz->ftype; 
+	F = wiz->samplerate; 
+	nbits = wiz->nbits;
+	bi = wiz->bi ? 1 : 0; 
+	id = wiz->id ? 1 : 0; 
+	rx = wiz->rx ? 1 : 0; 
+	as = wiz->as; 
+	asmin = wiz->asmin; 
+	es = wiz->es; 
+	fs = wiz->fs; 
+	ap = wiz->ap; 
+	ep = wiz->ep; 
+	fp = wiz->fp; 
+	ff = wiz->ff; 
+
 	printf("\n");
 	printf("+------------------------------------------------------------+\n");
 	printf("| LWDF Wizard                                                |\n");
@@ -191,31 +137,12 @@ int lwdf_wiz(struct lwdf_info * inf)
 	printf("|                                                            |\n");
 	printf("+------------------------------------------------------------+\n");
 	printf("\n");
-	printf(" %d) Butterworth (no ripples, max flat step response)\n", 
+	printf(" %d) Butterworth\n", 
 		   LWDF_BUTTW);
-	printf(" %d) Chebyshev I (passband ripples, steeper transition)\n", 
+	printf(" %d) Chebyshev I\n", 
 		   LWDF_CHEB1);
-	printf(" %d) Elliptic/Cauer (pass&stopband ripples, steepest transition)\n", 
+	printf(" %d) Elliptic\n", 
 		   LWDF_ELLIP);
-
-	load_conf(confpath, conf_root);
-	save_conf(confpath, conf_root);
-
-	ftype = lwdf_conf.ftype; 
-	F = lwdf_conf.samplerate; 
-	nbits = lwdf_conf.nbits;
-	bi = lwdf_conf.bi ? 1 : 0; 
-	id = lwdf_conf.id ? 1 : 0; 
-	rx = lwdf_conf.rx ? 1 : 0; 
-	as = lwdf_conf.as; 
-	asmin = lwdf_conf.asmin; 
-	es = lwdf_conf.es; 
-	fs = lwdf_conf.fs; 
-	ap = lwdf_conf.ap; 
-	ep = lwdf_conf.ep; 
-	fp = lwdf_conf.fp; 
-	ff = lwdf_conf.ff; 
-
 
 	do {
 		input_int(" - <ft> filter type? ", &ftype);
@@ -576,38 +503,21 @@ int lwdf_wiz(struct lwdf_info * inf)
 				  &rx);
 	} while ((rx > 1) || ((rx < 0) ));
 
-	inf->samplerate = F;
-	inf->ftype = ftype;
-	inf->order = N;
-	inf->nbits = nbits;
-	inf->bi = bi == 1 ? true : false;
-	inf->id = id == 1 ? true : false;
-	inf->rx = rx == 1 ? true : false;
-	inf->as = as;
-	inf->es = es;
-	inf->fs = fs;
-	inf->ap = ap;
-	inf->fp = fp;
+	wiz->samplerate = F;
+	wiz->ftype = ftype;
+	wiz->order = N;
+	wiz->nbits = nbits;
+	wiz->bi = bi == 1 ? true : false;
+	wiz->id = id == 1 ? true : false;
+	wiz->rx = rx == 1 ? true : false;
+	wiz->as = as;
+	wiz->es = es;
+	wiz->fs = fs;
+	wiz->ap = ap;
+	wiz->fp = fp;
+
 	for (i = 0; i < LWDF_NMAX; i++)
 		inf->gamma[i] = gamma[i];
 
-	lwdf_conf.ftype = ftype; 
-	lwdf_conf.samplerate = F; 
-	lwdf_conf.order = N;
-	lwdf_conf.nbits = nbits;
-	lwdf_conf.bi = bi == 1 ? true : false; 
-	lwdf_conf.id = id == 1 ? true : false; 
-	lwdf_conf.rx = rx == 1 ? true : false;
-	lwdf_conf.asmin = asmin; 
-	lwdf_conf.as = as; 
-	lwdf_conf.es = es; 
-	lwdf_conf.fs = fs; 
-	lwdf_conf.ap = ap; 
-	lwdf_conf.ep = ep; 
-	lwdf_conf.fp = fp; 
-	lwdf_conf.ff = ff; 
-
-	save_conf(confpath, conf_root);
-
-	return 0;
+	return N;
 }

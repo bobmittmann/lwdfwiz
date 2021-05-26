@@ -36,27 +36,68 @@
 #include <assert.h>
 
 #include "lwdf.h"
+#include "conf.h"
 
-#define APP_NAME "sweep"
+#define PROG_NAME "lwdfwiz"
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 0
 
 static char *progname;
 
-#define MAXSTR 128	
-#define FNAMECODE "test/filter.c"
-#define FNAMEGAMMA "lwdf_gamma.txt"
 
+struct lwdfwiz_cfg conf = {
+	.wiz = {
+		.samplerate = 88200,
+		.ftype = LWDF_ELLIP,
+		.order = 13,
+		.nbits = 0,
+		.bi = false,
+		.id = false,
+		.rx = false,
+		.ff = false,
+		.asmin = 6.0,
+		.as = 6.0,
+		.es = 0.0,
+		.fs = 22100.0,
+		.ap = 0.0,
+		.ep = 0.0,
+		.fp = 0.0
+	},
+	.prefix = "lp",
+	.cfname = "../test/filter.c",
+	.jlfname = "test.jl"
+};
 
-/**
- * @brief	main entry
- * @param	command line argument
- * @return	error code
+/*
+ * Configuration profile
  */
+/* *INDENT-OFF* */
+BEGIN_SECTION(wiz)
+       DEFINE_FLOAT("samplerate", &conf.wiz.samplerate)
+       DEFINE_INT("ftype", &conf.wiz.ftype)
+       DEFINE_INT("nbits", &conf.wiz.nbits)
+       DEFINE_FLOAT("asmin", &conf.wiz.asmin)
+       DEFINE_FLOAT("as", &conf.wiz.as)
+       DEFINE_FLOAT("es", &conf.wiz.es)
+       DEFINE_FLOAT("fs", &conf.wiz.fs)
+       DEFINE_FLOAT("ap", &conf.wiz.ap)
+       DEFINE_FLOAT("ep", &conf.wiz.ep)
+       DEFINE_FLOAT("fp", &conf.wiz.fp)
+       DEFINE_BOOLEAN("bi", &conf.wiz.bi)
+       DEFINE_BOOLEAN("id", &conf.wiz.id)
+       DEFINE_BOOLEAN("rx", &conf.wiz.rx)
+       DEFINE_BOOLEAN("ff", &conf.wiz.ff)
+END_SECTION
+/* *INDENT-ON* */
 
-#define FNAME_MAX_LEN 128
-#define PREFIX_MAX_LEN 32
+BEGIN_SECTION(conf_root)
+       DEFINE_SECTION("wizard", &wiz)
+       DEFINE_STRING("prefix", &conf.prefix)
+       DEFINE_STRING("cfname", &conf.prefix)
+       DEFINE_STRING("jlfname", &conf.jlfname)
+END_SECTION
 
+const char *confpath = "lwdwiz.conf";
 
 void system_cleanup(void)
 {
@@ -82,8 +123,18 @@ static void show_usage(void)
 
 static void show_version(void)
 {
-	fprintf(stderr, "%s %d.%d\n", APP_NAME, VERSION_MAJOR, VERSION_MINOR);
+	fprintf(stderr, "%s %d.%d\n", PROG_NAME, VERSION_MAJOR, VERSION_MINOR);
 }
+
+
+#define FNAME_MAX_LEN 128
+
+/**
+ * @brief	main entry
+ * @param	command line argument
+ * @return	error code
+ */
+
 int main(int argc, char *argv[])
 {
 	char outname[FNAME_MAX_LEN + 1] = "";
@@ -92,17 +143,18 @@ int main(int argc, char *argv[])
 	bool gmgen = false;
 	bool cgen = false;
 	bool hgen = false;
+	bool do_magic = true;
 	bool outname_set = false;
 	int decimate = 0;
 	int oversample = 1;
 	int interleave = 1;
 	int verbose = 1;
 	int quiet = 0;
+	struct lwdfwiz_param wiz;
 	struct lwdf_info inf;
 	FILE *fout;
 	int c;
 	int i;
-	int N;
 
 	/* the program name start just after the last slash */
 	if ((progname = (char *)strrchr(argv[0], '/')) == NULL)
@@ -110,8 +162,17 @@ int main(int argc, char *argv[])
 	else
 		progname++;
 
+	/* Try loading configuration from file */
+	if (load_conf(confpath, conf_root) <= 0) {
+		/* Write back the defaults */
+		save_conf(confpath, conf_root);
+	}
+
+	/* copy from configuration */
+	wiz = conf.wiz;
+
 	/* parse the command line options */
-	while ((c = getopt(argc, argv, "VH?hvqgjcdho:F:xdi")) > 0) {
+	while ((c = getopt(argc, argv, "VH?hvqgjcdho:F:xdib:n:t:")) > 0) {
 		switch (c) {
 		case 'V':
 			show_version();
@@ -143,7 +204,10 @@ int main(int argc, char *argv[])
 			outname_set = true;
 			break;
 		case 'F':
-			samplerate = strtof(optarg, NULL);
+			wiz.samplerate = strtof(optarg, NULL);
+			break;
+		case 'a':
+			wiz.as = strtof(optarg, NULL);
 			break;
 		case 'x':
 			oversample = strtoul(optarg, NULL, 10);
@@ -153,6 +217,15 @@ int main(int argc, char *argv[])
 			break;
 		case 'i':
 			interleave = strtoul(optarg, NULL, 10);
+			break;
+		case 'b':
+			wiz.nbits = strtoul(optarg, NULL, 10);
+			break;
+		case 'N':
+			wiz.order = strtoul(optarg, NULL, 10);
+			break;
+		case 't':
+			wiz.ftype = strtoul(optarg, NULL, 10);
 			break;
 		default:
 			show_usage();
@@ -201,19 +274,29 @@ int main(int argc, char *argv[])
 
 	if (verbose) {
 		fprintf(stderr, "\n");
-		fprintf(stderr, "LWDF (Lattice Wave Digital Filters) Generator. %d.%d\n", 
+		fprintf(stderr, " LWDF Wizard. %d.%d\n", 
 				VERSION_MAJOR, VERSION_MINOR);
-		fprintf(stderr, "(C) Copyright 2021, Bob Mittmann.\n");
+		fprintf(stderr, " Lattice Wave Digital Filters Generator\n"); 
+		fprintf(stderr, " (C) Copyright 2021, Bob Mittmann.\n");
 		fprintf(stderr, "\n");
 	}
 
-	if (lwdf_wiz(&inf) < 0) {
-		fprintf(stderr, "!Error!1\n");
-		return 1;
+	/* readback */
+
+	if (do_magic) {
+		if (lwdfwiz_term(&wiz, &inf) < 0) {
+			fprintf(stderr, "!Error!1\n");
+			return 1;
+		}
+
+		/* write back to configuration */
+		conf.wiz = wiz;
+		/* save configuration */
+		save_conf(confpath, conf_root);
 	}
 
 	if (gmgen) {
-		N = inf.order;
+		unsigned int N = wiz.order;
 
 		for (i = 0; i < N; i++) {
 			fprintf(fout, " gamma[%2d] = ", i);
@@ -225,7 +308,8 @@ int main(int argc, char *argv[])
 
 		if (outname_set) {
 			if (verbose) {
-				fprintf(stderr, "gamma coefficients saved to file %s\n", outname);
+				fprintf(stderr, "gamma coefficients saved to file %s\n", 
+						outname);
 			}
 			fclose(fout);
 		}
@@ -233,7 +317,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	lwdf_cgen(fout, &inf);
+	lwdf_cgen(fout, &wiz, &inf);
 
 	if (outname_set) {
 		if (verbose) {
