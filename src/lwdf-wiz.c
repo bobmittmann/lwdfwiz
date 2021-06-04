@@ -163,17 +163,16 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 	} while ((asmin > 200.0) || (asmin <= 0.0));
 
 	as = asmin;
+	/* as = 10.0*log(1.0+es*es) / log(10.0); */
+	es = sqrt(exp(log(10.0) * (as / 10.0)) - 1.0);	
 	
 	do {
 		input_double(" - <fs> stopband lower edge [Hz]? ", &fs);
 	} while ((fs >= F/2.0) || (fs <= 0));
 
-	/* as = 10.0*log(1.0+es*es) / log(10.0); */
-	es = sqrt(exp(log(10.0) * (as / 10.0)) - 1.0);	
-
 	/* stopband transformed frequency */
 	phis = tan(M_PI * fs / F);
-	if (bi) {
+	if ((ftype == LWDF_ELLIP) && (bi)) {
 		ep = 1.0 / es;
 		phip = 1.0 / phis;
 
@@ -184,20 +183,15 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 
 		/* ap set below after epmin <= ep is chosen */
 		fp = (F / 2.0) - fs;	
-		do {
-			input_double(" - <fp> fp passband upper edge [Hz]? ", &fp);
-		} while (fp >= F/2.0);
-
+		printf(" ... passband upper edge %.1f [Hz]\n", fp);
 	} else {
 		do {
 			input_double(" - <as> passband attenuation spread [dB]? ", &ap);
-		} while (as > 100.0);
+		} while (ap > 100.0);
 
 		/* as = 10.0*log(1.0+es*es) / log(10.0); */
 		ep = sqrt(exp(log(10.0) * (ap / 10.0)) - 1.0);	
 
-		/* ap set below after epmin <= ep is chosen */
-		fp = (F / 2.0) - fs;	
 		do {
 			input_double(" - <fp> fp passband upper edge [Hz]? ", &fp);
 		} while (fp >= F/2.0);
@@ -213,7 +207,7 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 
 	k0 = sqrt(phis / phip);
 
-	if (isnan(k0) || (k0 < 1.0)) {
+	if (isnan(k0)) {
 		fprintf(stderr, "#error: k0=%f = sqrt(phis=%f / phip=%f) !!!\n", 
 				k0, phis, phip);
 		return 1;
@@ -256,7 +250,7 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 	Nmin = (int)ceil(c1 * log(c2 * es / ep) / log(c3));
 
 	if ((Nmin % 2) == 0)
-		Nmin++;		// odd min order
+		Nmin++;		/* odd min order */
 
 	if (Nmin < 1) {
 		fprintf(stderr, "#error: Nmin=%d\n", Nmin);
@@ -265,16 +259,18 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 
 	N = Nmin;
 	do {
-		sprintf(s, " - < N> order (min=%d, max=%d, must be odd)? ", Nmin, LWDF_NMAX);
+		sprintf(s, " - < N> order (min=%d, max=%d, must be odd)? ", 
+				Nmin, LWDF_NMAX);
 		input_int(s, &N);
 	} while ((N > LWDF_NMAX) || (N < Nmin));
 	if (N > LWDF_NMAX)
 		N = LWDF_NMAX;
 	if ((N % 2) == 0)
-		return 0;	// if even, code would not be correct
+		return 0;	/* if even, code would not be correct */
 
 	do {
-		input_int(" - <ff> flip frequency response around F/4 (0=no 1=yes)? ", &ff);
+		input_int(" - <ff> flip frequency response around F/4 (0=no 1=yes)? ",
+				  &ff);
 	} while ((ff > 1) || ((ff < 0) ));
 
 	for (i = 0; i < LWDF_NMAX; i++)
@@ -326,7 +322,10 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 				tt = t * cos(M_PI * (double)i / (double)N);
 				gamma[i * 2 - 1] = (tt - 1.0) / (tt + 1.0);
 				gamma[i * 2] = g;
-		}} break;
+			}
+		} 
+		break;
+
 	case LWDF_CHEB1:
 		for (t = 1.0, i = 0; i < N; t = t * k1, i++);
 		epmin = (2.0 * es) / t;
@@ -351,7 +350,9 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 			      2.0 * cos(2.0 * t)) * (phip * phip) / 4.0;
 			gamma[i * 2 - 1] = (Ai - Bi - 1.0) / (Ai + Bi + 1.0);
 			gamma[i * 2] = (1.0 - Bi) / (1.0 + Bi);
-		} break;
+		} 
+		break;
+
 	case LWDF_ELLIP:
 		if (bi)
 			r = es;
@@ -368,7 +369,8 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 			fsmin = (F / M_PI) * atan(phip * t * t);
 		fsmax = fs;
 		do {
-			sprintf(s, " - <fs> (%.0f better transition to %.0f better pass&stopband)? ", 
+			sprintf(s, " - <fs> (%.0f better transition to"
+					" %.0f better pass&stopband)? ", 
 					fsmin, fsmax);
 			input_double(s, &fs);
 		} while ((fs < fsmin) || (fs > fsmax));
@@ -510,11 +512,14 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 	wiz->bi = bi == 1 ? true : false;
 	wiz->id = id == 1 ? true : false;
 	wiz->rx = rx == 1 ? true : false;
+	wiz->asmin = asmin; 
 	wiz->as = as;
 	wiz->es = es;
 	wiz->fs = fs;
 	wiz->ap = ap;
+	wiz->ep = ep;
 	wiz->fp = fp;
+	wiz->ff = ff;
 
 	for (i = 0; i < LWDF_NMAX; i++)
 		inf->gamma[i] = gamma[i];

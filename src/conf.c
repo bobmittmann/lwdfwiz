@@ -28,6 +28,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
@@ -523,10 +525,10 @@ int string_set(struct conf_var *var, const char *s)
 
 int bool_get(struct conf_var *var, char *s)
 {
-	if ((*(int *) (var->p)) == 0)
-		sprintf(s, "False");
+	if ((*(bool *) (var->p)) == false)
+		sprintf(s, "false");
 	else
-		sprintf(s, "True");
+		sprintf(s, "true");
 	return 1;
 }
 
@@ -545,7 +547,7 @@ int bool_set(struct conf_var *var, const char *s)
 		!strncasecmp(cp, "YES", 3) ||
 		!strncasecmp(cp, "ON", 2) || !strncasecmp(cp, "1", 1)) {
 
-		*((int *) var->p) = 1;
+		*((bool *) var->p) = true;
 		return 1;
 	}
 
@@ -553,7 +555,7 @@ int bool_set(struct conf_var *var, const char *s)
 		!strncasecmp(cp, "NO", 2) ||
 		!strncasecmp(cp, "OFF", 3) || !strncasecmp(cp, "0", 1)) {
 
-		*((int *) var->p) = 0;
+		*((bool *) var->p) = false;
 		return 1;
 	}
 

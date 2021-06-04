@@ -119,7 +119,8 @@ static void adaptor(int i, int t, double g, char *in1, char *in2,
 	return;
 }
 
-int lwdf_cgen(FILE *fout, const struct lwdfwiz_param * wiz, 
+int lwdf_cgen(FILE * fout, const char * prefix,
+			  const struct lwdfwiz_param * wiz, 
 			  const struct lwdf_info * inf)
 {
 	char in1[16], in2[16], out1[16], out2[16];
@@ -141,6 +142,12 @@ int lwdf_cgen(FILE *fout, const struct lwdfwiz_param * wiz,
 	bi = wiz->bi;
 	/* bireciprocal for decimation/interpolation (0=no, 1=yes)? */
 	id = wiz->id;
+	if (bi) {
+		/* bireciprocal for decimation/interpolation (0=no, 1=yes)? */
+		id = wiz->id;
+	} else {
+		id = false;
+	}
 	/* bits (not including sign bit, 0=no quantization)? */
 	nbits = wiz->nbits;
 	/* reuse and minimize temporary variables (0=no, 1=yes)?  */

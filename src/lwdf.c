@@ -97,7 +97,7 @@ BEGIN_SECTION(conf_root)
        DEFINE_STRING("jlfname", &conf.jlfname)
 END_SECTION
 
-const char *confpath = "lwdwiz.conf";
+const char *confpath = "lwdfwiz.conf";
 
 void system_cleanup(void)
 {
@@ -128,6 +128,7 @@ static void show_version(void)
 
 
 #define FNAME_MAX_LEN 128
+#define PREFIX_MAX_LEN 32
 
 /**
  * @brief	main entry
@@ -138,6 +139,7 @@ static void show_version(void)
 int main(int argc, char *argv[])
 {
 	char outname[FNAME_MAX_LEN + 1] = "";
+	char prefix[PREFIX_MAX_LEN + 1] = "";
 	double samplerate = 11025;
 	bool jlgen = false;
 	bool gmgen = false;
@@ -172,7 +174,7 @@ int main(int argc, char *argv[])
 	wiz = conf.wiz;
 
 	/* parse the command line options */
-	while ((c = getopt(argc, argv, "VH?hvqgjcdho:F:xdib:n:t:")) > 0) {
+	while ((c = getopt(argc, argv, "VH?hvqgjcdho:F:xdib:n:t:r:")) > 0) {
 		switch (c) {
 		case 'V':
 			show_version();
@@ -200,8 +202,11 @@ int main(int argc, char *argv[])
 			hgen = true;
 			break;
 		case 'o':
-			strcpy(outname, optarg);
+			strncpy(outname, optarg, FNAME_MAX_LEN);
 			outname_set = true;
+			break;
+		case 'r':
+			strncpy(prefix, optarg, PREFIX_MAX_LEN);
 			break;
 		case 'F':
 			wiz.samplerate = strtof(optarg, NULL);
@@ -317,13 +322,24 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	lwdf_cgen(fout, &wiz, &inf);
-
-	if (outname_set) {
-		if (verbose) {
-			fprintf(stderr, "C code saved to file %s\n", outname);
+	if (cgen) {
+		lwdf_cgen(fout, prefix, &wiz, &inf);
+		if (outname_set) {
+			if (verbose) {
+				fprintf(stderr, "C code saved to file %s\n", outname);
+			}
+			fclose(fout);
 		}
-		fclose(fout);
+	}
+
+	if (jlgen) {
+		lwdf_jlgen(fout, prefix, &wiz, &inf);
+		if (outname_set) {
+			if (verbose) {
+				fprintf(stderr, "Julia code saved to file %s\n", outname);
+			}
+			fclose(fout);
+		}
 	}
 
 	return 0;
