@@ -24,7 +24,7 @@ OFILES = $(CFILES:.c=.o)
 
 LIBS = m pthread
 
-INCPATH	= . plot 
+INCPATH	= ../include plot  .
 LIBPATH =
 
 DBGOPTS = -g 

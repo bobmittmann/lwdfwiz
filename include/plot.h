@@ -32,10 +32,6 @@
 #include <cairo/cairo.h>
 #include <gtk/gtk.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct plt_color PlotColor;
 typedef struct plt_rect PlotRect;
 typedef struct plt_font PlotFont;
@@ -55,6 +51,10 @@ typedef struct plt_legend PlotLegend;
 
 typedef struct plt_figure PlotFigure;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 PlotFigure * plt_figure_new(const char * title, const char * xlabel, const char * ylabel);
 
@@ -63,6 +63,10 @@ void plt_figure_widget_connect(PlotFigure * figure, GtkWidget * darea);
 PlotSeries * plt_line_series_new(PlotFigure * fig, const char * label, unsigned int max);
 
 int plt_line_series_insert(PlotSeries * lin, const double x[], const double y[], unsigned int cnt);
+
+int plt_line_series_set(PlotSeries * series, const double x[], 
+						const double y[], unsigned int cnt);
+
 
 int plt_line_series_clear(PlotSeries * fig);
 
@@ -74,6 +78,18 @@ int plt_series_line_width_set(PlotSeries * series, double w);
 /* GTK related functions */
 void init_drawing_plot(GtkWidget * drawing);
 
+int plt_figure_xticks_set(PlotFigure * fig, const double x[], char * const lbl[], unsigned int cnt);
+
+int plt_figure_yticks_set(PlotFigure * fig, const double y[], char * const lbl[], unsigned int cnt);
+
+void plt_mk_lin_ticks(double pos[], char ** label, double from, double to, unsigned int cnt);
+
+int plt_mk_log10_ticks(double pos[], char * label[], double from, double to, unsigned int cnt);
+
+int plt_figure_xspan_set(struct plt_figure * figure, double x0, double x1);
+int plt_figure_yspan_set(struct plt_figure * figure, double y0, double y1);
+
+int plt_offs_set(struct plt_figure * figure, double x, double y);
 
 #ifdef __cplusplus
 }

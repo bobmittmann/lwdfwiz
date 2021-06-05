@@ -26,12 +26,11 @@
  *
  */
 
-#include <gtk/gtk.h>
 #include "plot.h"
+#include "glwdf.h"
 
-void lwdf_freq_response_plot_init(GtkWidget * darea);
 
-float grab_float_value (GtkSpinButton *button, gpointer user_data)
+float grab_float_value(GtkSpinButton *button, gpointer user_data)
 {
   return gtk_spin_button_get_value (button);
 }
@@ -40,7 +39,6 @@ void on_gamma_change(GtkButton *b)
 {
     printf("You selected: %s\n", gtk_button_get_label (b));
 }
-
 
 GtkWidget * create_fixpt_spin_button(GtkGrid * grid, int row, double value)
 {
@@ -53,14 +51,13 @@ GtkWidget * create_fixpt_spin_button(GtkGrid * grid, int row, double value)
 	label = gtk_label_new(text);
 
 	adjustment = gtk_adjustment_new(value, -2, 2, 0.000001, 0.001, 0.0);
-	// creates the spinbutton, with six decimal places
+	/* creates the spinbutton, with six decimal places */
 	button = gtk_spin_button_new (adjustment, 0.000001, 6);
 	g_signal_connect(button, "value-changed", G_CALLBACK(on_gamma_change), NULL);
 
 	gtk_grid_insert_row(grid, row);
 	gtk_grid_attach(grid, label, 1, row, 1, 1);
 	gtk_grid_attach(grid, button, 2, row, 1, 1);
-
 
 	return button;
 }
@@ -95,17 +92,14 @@ void init_grid_gamma(GtkWidget * grid)
 	 update_grid_gamma(GTK_GRID(grid), gamma, n);
 }
 
-
-struct  {
-} app_widget;
-
-
-// called when window is closed
+/* called when window is closed */
 void on_window_main_destroy()
 {
     gtk_main_quit();
 }
 
+/* Singleton application */
+struct glwdf_app app;
 
 int main(int argc, char *argv[])
 {
@@ -113,7 +107,7 @@ int main(int argc, char *argv[])
     GtkWidget * window;
     GtkWidget * drawing_plot;
 	GtkWidget * grid_gamma;
-
+	PlotFigure * figure; 
     GError * error = NULL;
 
     gtk_init(&argc, &argv);
@@ -132,12 +126,15 @@ int main(int argc, char *argv[])
     gtk_builder_connect_signals(builder, NULL);
 
 	grid_gamma = GTK_WIDGET(gtk_builder_get_object(builder, "grid_gamma"));
+	init_grid_gamma(grid_gamma);
+	app.grid_gamma = grid_gamma;
+
   	drawing_plot = GTK_WIDGET(gtk_builder_get_object(builder, "drawing_plot"));
+	figure = glwdf_freq_response_plot_init(drawing_plot);
+	app.figure = figure;
 
     g_object_unref(builder);
 
-	lwdf_freq_response_plot_init(drawing_plot);
-	init_grid_gamma(grid_gamma);
     gtk_widget_show_all(window);                
     gtk_main();
 

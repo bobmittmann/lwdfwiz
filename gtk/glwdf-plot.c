@@ -30,36 +30,125 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <math.h>
 
-static const double buf_x[]= {100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0};
-static const double buf_y[]= {100.0, 114.0, 120.0, 180.0, 136.0, 210.0, 150.0};
+static void plt_series_sine(struct plt_series * series, double freq, unsigned int npts)
+{
+	double x[1024 + 8];
+	double y[1024 + 8];
+	double itv = 2 * M_PI;
+	double dw = itv / npts;
+	double w;
+	unsigned int i;
 
-void lwdf_freq_response_plot_init(GtkWidget * darea)
+	for (i = 0, w = 0; i < npts; ++i, w += dw) {
+		x[i] = w;
+	}
+
+	for (i = 0; i < npts; ++i) {
+		y[i] = sin(freq * x[i]);
+	}
+
+	plt_line_series_set(series, x, y, npts);
+}
+
+
+PlotFigure * glwdf_freq_response_plot_init(GtkWidget * darea)
 {
 	struct plt_figure * figure;
 	struct plt_series * series;
-	double x[1024];
-	double y[1024];
-	int cnt;
+	unsigned int npts = 1024;
+	double pos[128];
+	char * lbl[128];
+	char buf[128 * 16];
+	int n;
 	int i;
 
-	figure = plt_figure_new("My Plot", "Frequency [Hz]", "Magnitude [dB]");
+	figure = plt_figure_new("LWDF Response", "Frequency [Hz]", "Magnitude [dB]");
 
-	fprintf(stderr, "figure=%p.\n", figure);
+#if (DEBUG)
+	fprintf(stderr, "figure=%p\n", figure);
+#endif
 
+	series = plt_line_series_new(figure, "Test Data", npts);
 
-	series = plt_line_series_new(figure, "Test Data", 1024);
-	cnt = sizeof(buf_x) / sizeof(double);
-	for (i = 0; i < cnt; ++i) {
-		x[i] = buf_x[i];
-		y[i] = buf_y[i];
-	}
-	plt_line_series_insert(series, x, y, cnt);
+	// fprintf(stderr, "1.\n");
 	plt_series_line_color_set(series, 1.0, 0.0, 0.0, 1.0);
-	plt_series_line_width_set(series, 4.0);
+	plt_series_line_width_set(series, 2.0);
+
+	/* set the string pointers */
+	n = 11;
+	for(i = 0; i < n; ++i)
+		lbl[i] = &buf[i * 16];
+
+	plt_figure_xspan_set(figure, 0, 2 * M_PI);
+	plt_mk_log10_ticks(pos, lbl, 0.01 * M_PI, 2 * M_PI, n);
+	plt_figure_xticks_set(figure, pos, lbl, n);
+
+
+	/* set the string pointers */
+	n = 9;
+	for(i = 0; i < n; ++i)
+		lbl[i] = &buf[i * 16];
+
+	plt_figure_yspan_set(figure, -1.0, 1.0);
+	plt_mk_lin_ticks(pos, lbl, -1.0, 1.0, n);
+	plt_figure_yticks_set(figure, pos, lbl, n);
+	
+	plt_series_sine(series, 100, npts);
 
 	plt_figure_widget_connect(figure, darea);
 
-	fprintf(stderr, "3.\n");
+	return figure;
 }
+
+
+PlotFigure * glwdf_time_response_plot_init(GtkWidget * darea)
+{
+	struct plt_figure * figure;
+	struct plt_series * series;
+	unsigned int npts = 1024;
+	double pos[128];
+	char * lbl[128];
+	char buf[128 * 16];
+	int n;
+	int i;
+
+	figure = plt_figure_new("LWDF Response", "Frequency [Hz]", "Magnitude [dB]");
+
+	fprintf(stderr, "figure=%p\n", figure);
+
+	series = plt_line_series_new(figure, "Test Data", npts);
+
+	// fprintf(stderr, "1.\n");
+	plt_series_line_color_set(series, 1.0, 0.0, 0.0, 1.0);
+	plt_series_line_width_set(series, 2.0);
+
+	/* set the string pointers */
+	n = 11;
+	for(i = 0; i < n; ++i)
+		lbl[i] = &buf[i * 16];
+
+	plt_figure_xspan_set(figure, 0, 2 * M_PI);
+	plt_mk_lin_ticks(pos, lbl, 0.0, 2 * M_PI, n);
+	plt_figure_xticks_set(figure, pos, lbl, n);
+
+
+	/* set the string pointers */
+	n = 9;
+	for(i = 0; i < n; ++i)
+		lbl[i] = &buf[i * 16];
+
+	plt_figure_yspan_set(figure, -1.0, 1.0);
+	plt_mk_lin_ticks(pos, lbl, -1.0, 1.0, n);
+	plt_figure_yticks_set(figure, pos, lbl, n);
+	
+	plt_series_sine(series, 2, npts);
+
+	plt_figure_widget_connect(figure, darea);
+
+	return figure;
+}
+
+
 

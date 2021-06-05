@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+AM_CPPFLAGS = -I../include
+
 AM_CFLAGS = -O1 -Wall -g
 
 bin_PROGRAMS = lwdfwiz
