@@ -26,6 +26,8 @@
  *
  */
 
+_Pragma ("GCC optimize (\"Ofast\")")
+
 #define __PLOT_CORE__
 #include "plot-i.h"
 
@@ -33,7 +35,8 @@
 #define DEBUG 0
 #endif
 
-static void draw_grid(cairo_t* cr, struct plt_chart * chart, struct plt_figure * figure)
+static void draw_grid(cairo_t* cr, struct plt_chart * chart, 
+					  struct plt_figure * figure)
 {
 	struct plt_rect rect = chart->rect;
 	static const double dashed[] = {2.0};
@@ -86,19 +89,83 @@ static void draw_grid(cairo_t* cr, struct plt_chart * chart, struct plt_figure *
 	cairo_restore(cr);
 }
 
-static void draw_ticks(cairo_t* cr, struct plt_chart * chart, struct plt_figure * figure)
+static void draw_ticks(cairo_t* cr, struct plt_chart * chart, 
+					   struct plt_figure * figure)
 {
+	struct plt_rect rect = chart->rect;
+	cairo_text_extents_t extents;
+	struct plt_ticks * ticks;
+	struct plt_font * font;
+	double text_length;
+	double * vx;
+	double * vy;
+	double x0;
+	double x1;
+	double y0;
+	double y1;
+	double ky;
+	double kx;
+	double oy;
+	double ox;
+	int n;
+	int i;
+
 	cairo_save(cr);
-	cairo_set_source_rgb(cr, 0.05, 0.05, 0.05);
-	cairo_set_line_width(cr, 3.0);
+	cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
+	cairo_set_line_width(cr, 2.0);
+
+	y0 = rect.y + rect.height + 4;
+	y1 = rect.y + rect.height;
+	kx = chart->scale.x;
+	ox = chart->offs.x;
+	font = &figure->axis.x.font;
+	ticks = &figure->axis.x.ticks;
+	vx = ticks->pos;
+	n = ticks->len;
+
+	cairo_select_font_face(cr, font->face, font->slant, font->weight);
+	cairo_set_font_size(cr, font->size * 0.8);
+
+	for(i = 0; i < n; ++i) {
+		double x = vx[i] * kx + ox;
+		cairo_move_to(cr, x, y0);
+		cairo_line_to(cr, x, y1);
+		cairo_stroke(cr);
+
+		cairo_text_extents(cr, ticks->label[i], &extents);
+		text_length = extents.width + extents.x_bearing;
+		cairo_move_to(cr, x - (text_length / 2), y0 + 10);
+		cairo_show_text(cr, ticks->label[i]);
+	}
+
+	x0 = rect.x - 4;
+	x1 = rect.x;
+	ky = chart->scale.y;
+	oy = chart->offs.y;
+	ticks = &figure->axis.y.ticks;
+	vy = ticks->pos;
+	n = ticks->len;
+
+	for(i = 0; i < n; ++i) {
+		double y = vy[i] * ky + oy;
+		cairo_move_to(cr, x0, y);
+		cairo_line_to(cr, x1, y);
+		cairo_stroke(cr);
+
+		cairo_text_extents(cr, ticks->label[i], &extents);
+		text_length = extents.width + extents.x_bearing;
+		cairo_move_to(cr, x0 - (text_length + 4), y + 5);
+		cairo_show_text(cr, ticks->label[i]);
+	}
 
 	cairo_restore(cr);
 }
 
-static void draw_axis(cairo_t* cr, struct plt_chart * chart, struct plt_figure * figure)
+static void draw_axis(cairo_t* cr, struct plt_chart * chart, 
+					  struct plt_figure * figure)
 {
-	cairo_text_extents_t extents;
 	struct plt_rect rect = chart->rect;
+	cairo_text_extents_t extents;
 	double text_length;
 	struct plt_axis * xaxis;
 	struct plt_axis * yaxis;
@@ -118,8 +185,8 @@ static void draw_axis(cairo_t* cr, struct plt_chart * chart, struct plt_figure *
 	cairo_set_font_size(cr, font->size);
 
 	cairo_text_extents(cr, yaxis->label, &extents);
-	text_length=extents.width/2.0+extents.x_bearing;
-	cairo_move_to(cr, rect.x-10.0, rect.y+text_length+(rect.height)/2.0);
+	text_length = extents.width/2.0+extents.x_bearing;
+	cairo_move_to(cr, rect.x - 40.0, rect.y+text_length+(rect.height)/2.0);
 
 	cairo_save(cr);
 
@@ -132,19 +199,22 @@ static void draw_axis(cairo_t* cr, struct plt_chart * chart, struct plt_figure *
 	cairo_restore(cr);
 
 	cairo_text_extents(cr, xaxis->label, &extents);
-	text_length=extents.width/2.0+extents.x_bearing;
-	cairo_move_to(cr, rect.x-text_length+(rect.width)/2.0, rect.y+rect.height+20.0);
+	text_length = extents.width/2.0+extents.x_bearing;
+	cairo_move_to(cr, rect.x-text_length+(rect.width)/2.0, 
+				  rect.y + rect.height + 30.0);
 	cairo_show_text(cr, xaxis->label);
 
 	cairo_restore(cr);
 }
 
-static void draw_background(cairo_t* cr, struct plt_rect rect, struct plt_figure * figure)
+static void draw_background(cairo_t* cr, struct plt_rect rect, 
+							struct plt_figure * figure)
 {
 	cairo_pattern_t* pat;
 
 	cairo_save(cr);
-	pat=cairo_pattern_create_linear(rect.width/2-5,5, rect.width/2-5, rect.height-5);
+	pat=cairo_pattern_create_linear(rect.width/2-5,5, rect.width/2-5, 
+									rect.height-5);
 	cairo_pattern_add_color_stop_rgba(pat, 0.0, 0.95, 0.95, 0.95, 1.0);
 	cairo_pattern_add_color_stop_rgba(pat, 1.0, 0.85, 0.85, 0.85, 1.0);
 	cairo_set_source(cr, pat);
@@ -153,7 +223,8 @@ static void draw_background(cairo_t* cr, struct plt_rect rect, struct plt_figure
 	cairo_restore(cr);
 }
 
-static void draw_border(cairo_t* cr, struct plt_rect rect, struct plt_figure * figure) 
+static void draw_border(cairo_t* cr, struct plt_rect rect, 
+						struct plt_figure * figure) 
 {
 	cairo_save(cr);
 
@@ -165,10 +236,11 @@ static void draw_border(cairo_t* cr, struct plt_rect rect, struct plt_figure * f
 	cairo_restore(cr);
 }
 
-static void draw_title(cairo_t* cr, struct plt_rect rect, struct plt_figure * figure) 
+static void draw_title(cairo_t* cr, struct plt_rect rect, 
+					   struct plt_figure * figure) 
 {
-	struct plt_font * font;
 	cairo_text_extents_t extents;
+	struct plt_font * font;
 	double text_length;
 
 	cairo_save(cr);
@@ -189,8 +261,9 @@ static void draw_title(cairo_t* cr, struct plt_rect rect, struct plt_figure * fi
 }
 
 
-static void draw_line(cairo_t* cr, struct plt_chart * chart, struct plt_point * point, 
-					   struct plt_line_info * info)
+static void draw_line(cairo_t* cr, struct plt_chart * chart, 
+					  struct plt_point * point, 
+					  struct plt_line_info * info)
 {
 	struct plt_point p0;
 	struct plt_point p1;
@@ -224,7 +297,8 @@ static void draw_line(cairo_t* cr, struct plt_chart * chart, struct plt_point * 
 	cairo_stroke(cr);
 }
 
-static void draw_series(cairo_t* cr, struct plt_chart * chart, struct plt_figure * figure)
+static void draw_series(cairo_t* cr, struct plt_chart * chart, 
+						struct plt_figure * figure)
 {
 	/* get the bounding rectangle (box) */
 	struct plt_rect rect = chart->rect;
@@ -252,8 +326,9 @@ static void draw_series(cairo_t* cr, struct plt_chart * chart, struct plt_figure
 		cairo_set_source_rgba(cr, color.r, color.g, color.b, color.a);
 		cairo_set_line_width(cr, series->attr.line.width);
 
-#if (DEBUG)
-		fprintf(stderr, "series=\"%s\" %d points.\n", series->label, info->nseg);
+#if (DEBUG > 2)
+		fprintf(stderr, "series=\"%s\" %d points.\n", series->label, 
+				info->nseg);
 #endif
 
 		draw_line(cr, &figure->chart, point, info);
@@ -267,15 +342,23 @@ static void draw_series(cairo_t* cr, struct plt_chart * chart, struct plt_figure
 
 static void draw_legend(cairo_t* cr, struct plt_rect rect, PlotFigure * figure)
 {
-	cairo_text_extents_t extents;
-	double text_length, text_height;
-	static const char* legend1="V:Red";
+//	cairo_text_extents_t extents;
+//	double text_length, text_height;
+	struct plt_legend * legend;
+	struct plt_font * font;
+
+	legend = &figure->legend;
+	font = &legend->font;
 
 	cairo_save(cr);
+
+	cairo_select_font_face(cr, font->face, font->slant, font->weight);
+	cairo_set_font_size(cr, font->size);
+
 	cairo_set_line_width(cr, 2.0);
 	cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-	cairo_select_font_face(cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-	cairo_set_font_size(cr, 10.0);
+
+/*
 	cairo_text_extents(cr, (const char*)legend1, &extents);
 	text_length=extents.width/2.0+extents.x_bearing;
 	(void)text_length;
@@ -286,6 +369,8 @@ static void draw_legend(cairo_t* cr, struct plt_rect rect, PlotFigure * figure)
 	cairo_stroke(cr);
 	cairo_move_to(cr, rect.x+15.0, rect.y+10.0);
 	cairo_show_text(cr, (const char*)legend1);
+*/
+
 	cairo_restore(cr);
 }
 
@@ -295,7 +380,7 @@ gboolean on_draw_event(GtkWidget* widget, cairo_t* cr, PlotFigure * figure)
 	struct plt_rect viewport;
 	struct plt_chart * chart;
 
-#if (DEBUG)
+#if (DEBUG > 4)
 	fprintf(stderr, "on_draw(figure=%p).\n", figure);
 #endif
 
@@ -329,15 +414,17 @@ gboolean on_draw_event(GtkWidget* widget, cairo_t* cr, PlotFigure * figure)
 
 void on_realize(GtkWidget* widget, PlotFigure * figure)
 {
+#if (DEBUG > 2)
 	fprintf(stderr, "on_realize(figure=%p).\n", figure);
-
+#endif
 }
 
-void on_size_allocate(GtkWidget* widget, GtkAllocation *allocation, PlotFigure * figure)
+void on_size_allocate(GtkWidget* widget, GtkAllocation *allocation, 
+					  PlotFigure * figure)
 {
 	struct plt_rect disp;
 
-#if (DEBUG)
+#if (DEBUG > 4)
 	fprintf(stderr, "on_size_allocate(figure=%p).\n", figure);
 
 	fprintf(stderr, "   (%d, %d) (%d, %d).\n", allocation->x, allocation->y,
@@ -358,6 +445,7 @@ void plt_figure_widget_connect(struct plt_figure * figure, GtkWidget * darea)
 {
 	g_signal_connect(darea, "draw", G_CALLBACK(on_draw_event), figure);
 	g_signal_connect(darea, "realize", G_CALLBACK(on_realize), figure);
-	g_signal_connect(darea, "size-allocate", G_CALLBACK(on_size_allocate), figure);
+	g_signal_connect(darea, "size-allocate", G_CALLBACK(on_size_allocate), 
+					 figure);
 }
 

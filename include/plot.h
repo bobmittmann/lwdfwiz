@@ -29,6 +29,9 @@
 #ifndef __PLOT_H__
 #define __PLOT_H__
 
+#include <sys/types.h>
+#include <stdint.h>
+
 #include <cairo/cairo.h>
 #include <gtk/gtk.h>
 
@@ -37,7 +40,6 @@ typedef struct plt_rect PlotRect;
 typedef struct plt_font PlotFont;
 typedef struct plt_title PlotTitle;
 typedef struct plt_axis PlotAxis;
-
 
 enum plt_series_type {
 	PLT_SERIES_LINE = 1,
@@ -56,40 +58,77 @@ extern "C" {
 #endif
 
 
+/* -------------------------------------------------------------------------- 
+ * Figures
+ * -------------------------------------------------------------------------- */
+
 PlotFigure * plt_figure_new(const char * title, const char * xlabel, const char * ylabel);
 
-void plt_figure_widget_connect(PlotFigure * figure, GtkWidget * darea);
+int plt_figure_xticks_set(PlotFigure * fig, const double x[], char * const lbl[], size_t cnt);
 
-PlotSeries * plt_line_series_new(PlotFigure * fig, const char * label, unsigned int max);
+int plt_figure_yticks_set(PlotFigure * fig, const double y[], char * const lbl[], size_t cnt);
 
-int plt_line_series_insert(PlotSeries * lin, const double x[], const double y[], unsigned int cnt);
+int plt_figure_xspan_set(PlotFigure * figure, double x0, double x1);
+
+int plt_figure_yspan_set(PlotFigure * figure, double y0, double y1);
+
+int plt_figure_xspan_auto(struct plt_figure * figure);
+
+int plt_figure_yspan_auto(struct plt_figure * figure);
+
+int plt_offs_set(PlotFigure * figure, double x, double y);
+
+/* -------------------------------------------------------------------------- 
+ * Axis 
+ * -------------------------------------------------------------------------- */
+
+void plt_mk_lin_ticks(double pos[], char ** label, double from, 
+					  double to, size_t cnt);
+
+int plt_mk_log10_ticks(double pos[], char * label[], double from, 
+					   double to, size_t cnt);
+
+/* -------------------------------------------------------------------------- 
+ * Series
+ * -------------------------------------------------------------------------- */
+
+PlotSeries * plt_line_series_new(PlotFigure * fig, const char * label, 
+								 size_t max);
+
+int plt_line_series_insert(PlotSeries * lin, const double x[], 
+						   const double y[], size_t cnt);
 
 int plt_line_series_set(PlotSeries * series, const double x[], 
-						const double y[], unsigned int cnt);
+						const double y[], size_t cnt);
 
 
 int plt_line_series_clear(PlotSeries * fig);
 
-int plt_series_line_color_set(PlotSeries * series, double r, double g, 
+int plt_series_line_color_rgba_set(PlotSeries * series, double r, double g, 
 							  unsigned int b, double a);
+
+int plt_series_line_color_set(PlotSeries * series, const PlotColor * c);
 
 int plt_series_line_width_set(PlotSeries * series, double w);
 
-/* GTK related functions */
+/* -------------------------------------------------------------------------- 
+ * GTK related functions 
+ * -------------------------------------------------------------------------- */
+
 void init_drawing_plot(GtkWidget * drawing);
 
-int plt_figure_xticks_set(PlotFigure * fig, const double x[], char * const lbl[], unsigned int cnt);
+void plt_figure_widget_connect(PlotFigure * figure, GtkWidget * darea);
 
-int plt_figure_yticks_set(PlotFigure * fig, const double y[], char * const lbl[], unsigned int cnt);
+/* -------------------------------------------------------------------------- 
+ * Specialized figures 
+ * -------------------------------------------------------------------------- */
 
-void plt_mk_lin_ticks(double pos[], char ** label, double from, double to, unsigned int cnt);
+/* Frequency response */
+struct plt_figure * plt_figure_freq_resp_new(const char * title);
 
-int plt_mk_log10_ticks(double pos[], char * label[], double from, double to, unsigned int cnt);
+const struct plt_color * plt_stock_color_get(void);
 
-int plt_figure_xspan_set(struct plt_figure * figure, double x0, double x1);
-int plt_figure_yspan_set(struct plt_figure * figure, double y0, double y1);
-
-int plt_offs_set(struct plt_figure * figure, double x, double y);
+const struct plt_color * plt_stock_color_next(void);
 
 #ifdef __cplusplus
 }

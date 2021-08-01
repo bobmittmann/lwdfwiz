@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<object class="GtkAssistant" id="assistant">
+	<property name="title" translatable="yes">GWLDF Wizard</property>
+	
+		<child><object class="GtkAssistantPage" id="elliptic_page1">
+			<property name="page_type">content</property>
+			<property name="title" translatable="yes">Filter Design Tool</property>
+			<property name="complete">1</property>
+			
+			
+			<property name="child"><object class="GtkBox">
+				
+				<property name="orientation">vertical</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+				<property name="spacing">6</property>
+                
+				<property name="orientation">vertical</property>
+
+				<child><object class="GtkLabel">
+					<property name="label">Lattice Wave Digital Filters Wizard</property>
+					<property name="xalign">0</property>
+					                    <attributes>
+                      <attribute name="weight" value="semibold"/>
+                    </attributes>
+				</object></child>
+
+				<child><object class="GtkFrame">
+					<child><object class="GtkGrid">
+						
+						<property name="margin-start">6</property>
+						<property name="margin-end">6</property>
+						<property name="margin-top">6</property>
+						<property name="margin-bottom">6</property>
+						<property name="row-spacing">8</property>
+						<property name="column-spacing">8</property>
+
+						<child><object class="GtkLabel">
+						<property name="label" translatable="yes">Sample Rate:</property>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">0</property>
+						</layout>
+						</object></child>
+
+						<child><object class="GtkEntry">
+						<property name="xalign">1</property>
+						<property name="max-length">12</property>
+						<property name="placeholder-text">samplerate</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">0</property>
+						</layout>
+						</object></child>
+					
+						<child><object class="GtkLabel">
+						<property name="label" translatable="yes">[Hz]</property>
+						<layout>
+							<property name="column">2</property>
+							<property name="row">0</property>
+						</layout>
+						</object></child>
+
+					</object></child>		
+				</object></child>
+		
+				<child><object class="GtkFrame">
+					<child><object class="GtkGrid">
+						
+						<property name="margin-start">6</property>
+						<property name="margin-end">6</property>
+						<property name="margin-top">6</property>
+						<property name="margin-bottom">6</property>
+						<property name="row-spacing">0</property>
+						<property name="column-spacing">3</property>
+
+						<child><object class="GtkLabel">
+						<property name="label" translatable="yes">Design Method:</property>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">0</property>
+						</layout>
+						</object></child>
+
+					
+						<child><object class="GtkCheckButton" id="design_method">
+                            <property name="label" translatable="yes" context="design_method">Butterworth</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">Butterworth</property>
+                            <property name="hexpand">True</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">1</property>
+						</layout>
+						</object></child>
+					
+						<child><object class="GtkCheckButton">
+                            <property name="label" translatable="yes" context="design_method">Chebyshev I</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">Chebyshev I</property>
+                            <property name="hexpand">True</property>
+                            <property name="group">design_method</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">2</property>
+						</layout>
+						</object></child>
+	
+						<child><object class="GtkCheckButton">
+                            <property name="label" translatable="yes" context="design_method">Elliptic</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">Elliptic</property>
+                            <property name="hexpand">True</property>
+                            <property name="group">design_method</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">3</property>
+						</layout>
+						</object></child>
+	
+
+
+					</object></child>		
+				</object></child>
+				
+				
+			</object></property>
+		</object></child>
+
+		<child><object class="GtkAssistantPage" id="page2">
+			<property name="page_type">content</property>
+			<property name="title" translatable="yes">Second Page</property>
+			<property name="complete">1</property>
+			<property name="child"><object class="GtkBox">	
+
+				<property name="orientation">vertical</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+				<property name="spacing">6</property>
+                
+				<property name="orientation">vertical</property>
+
+				<child><object class="GtkLabel">
+					<property name="label">Lattice Wave Digital Filters Wizard</property>
+					<property name="xalign">0</property>
+					                    <attributes>
+                      <attribute name="weight" value="semibold"/>
+                    </attributes>
+				</object></child>
+		
+				<child><object class="GtkFrame">
+					<child><object class="GtkGrid">
+						
+						<property name="margin-start">6</property>
+						<property name="margin-end">6</property>
+						<property name="margin-top">6</property>
+						<property name="margin-bottom">6</property>
+						<property name="row-spacing">0</property>
+						<property name="column-spacing">3</property>
+
+						<child><object class="GtkLabel">
+						<property name="label" translatable="yes">Response Type:</property>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">0</property>
+						</layout>
+						</object></child>
+
+					
+						<child><object class="GtkCheckButton" id="response_type">
+                            <property name="label" translatable="yes" context="design_method">Low Pass</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">Low Pass</property>
+                            <property name="hexpand">True</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">1</property>
+						</layout>
+						</object></child>
+					
+						<child><object class="GtkCheckButton">
+                            <property name="label" translatable="yes" context="design_method">High Pass</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">High Pass</property>
+                            <property name="hexpand">True</property>
+                            <property name="group">response_type</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">2</property>
+						</layout>
+						</object></child>
+	
+						<child><object class="GtkCheckButton">
+                            <property name="label" translatable="yes" context="design_method">Elliptic</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">Elliptic</property>
+                            <property name="hexpand">True</property>
+                            <property name="group">response_type</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">3</property>
+						</layout>
+						</object></child>
+	
+					</object></child>		
+				</object></child>
+			
+				
+				
+				
+				
+				
+				
+				
+				
+								
+				<property name="orientation">horizontal</property>
+				<child><object class="GtkFrame">                
+					<child><object class="GtkLabel">
+						<property name="label">Done</property>
+						<property name="xalign">1</property>
+					</object></child>
+				</object></child>					
+			</object></property>
+		</object></child>
+
+
+		<child><object class="GtkAssistantPage" id="pag3">
+			<property name="page_type">confirm</property>
+			<property name="title" translatable="yes">Final Page</property>
+			<property name="complete">1</property>			
+			<property name="child">			
+				<object class="GtkBox">
+				<property name="orientation">horizontal</property>
+				<child><object class="GtkLabel">
+					<property name="label">Done</property>
+					<property name="xalign">1</property>
+				</object></child>
+				</object>
+			</property>
+		</object></child>
+
+
+		
+	</object>
+</interface>

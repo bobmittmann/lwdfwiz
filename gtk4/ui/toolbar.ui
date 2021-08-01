@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<object class="GtkBox" id="filtertoolbar">
+		<property name="accessible-role">toolbar</property>
+		<property name="css-classes">toolbar</property>
+		<accessibility>
+			<property name="label">Filter Toolbar</property>
+		</accessibility>
+		<child>
+		<object class="GtkSeparator"/>
+		</child>
+		<child>
+		  <object class="GtkButton">
+			<property name="label" translatable="yes">Copy</property>
+			<property name="tooltip-text" translatable="yes">Copy selected object into the clipboard</property>
+			<property name="icon-name">edit-copy</property>
+			<property name="action-name">win.copy</property>
+		  </object>
+		</child>
+		<child>
+		  <object class="GtkButton">
+			<property name="label" translatable="yes">Cut</property>
+			<property name="tooltip-text" translatable="yes">Cut selected object into the clipboard</property>
+			<property name="icon-name">edit-cut</property>
+			<property name="action-name">win.cut</property>
+		  </object>
+		</child>
+		<child>
+		  <object class="GtkButton">
+			<property name="label" translatable="yes">Paste</property>
+			<property name="tooltip-text" translatable="yes">Paste object from the clipboard</property>
+			<property name="icon-name">edit-paste</property>
+			<property name="action-name">win.paste</property>
+		  </object>
+		</child>
+		<child>	<object class="GtkSeparator"/> </child>
+
+
+	</object> 
+</interface>

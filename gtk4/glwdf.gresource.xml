@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/">
+  </gresource>
+  <gresource prefix="/glwdf_application">
+    <file>ui/menus.ui</file>
+    <file>ui/toolbars.ui</file>
+    <file>ui/glwdf-application_window.ui</file>
+	<file>ui/glwdf-filter_control.ui</file>
+	<file>ui/glwdf-filter_view.ui</file>
+	<file>ui/glwdf-frequency_control.ui</file>
+	<file>ui/glwdf-assistant.ui</file>
+	<file>ui/glwdf-assistant_butterworth.ui</file>
+    <file>icons/scalable/apps/glwdf-app.svg</file>
+  </gresource>
+</gresources>
+
+

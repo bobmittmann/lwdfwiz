@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	
+		<object class="GtkBox" id="butterworth_page1">
+			<property name="orientation">vertical</property>
+			<property name="margin-start">12</property>
+			<property name="margin-end">12</property>
+			<property name="margin-top">12</property>
+			<property name="margin-bottom">12</property>
+			<property name="spacing">6</property>                
+			<property name="orientation">vertical</property>
+			
+			<child><object class="GtkFrame">
+										
+				<child><object class="GtkGrid">
+					
+					<property name="margin-start">6</property>
+					<property name="margin-end">6</property>
+					<property name="margin-top">6</property>
+					<property name="margin-bottom">6</property>
+					<property name="row-spacing">8</property>
+					<property name="column-spacing">8</property>
+					<property name="hexpand">True</property>
+					<property name="halign">center</property>
+
+
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Stopband attenuation</property>
+					<property name="xalign">1</property>
+					<layout>
+						<property name="column">0</property>
+						<property name="row">0</property>
+					</layout>
+					</object></child>
+					<child><object class="GtkEntry" id="butterworth_as">
+					<property name="max-length">9</property>
+					<property name="placeholder-text">as</property>
+					<property name="xalign">1</property>
+					
+					<layout>
+						<property name="column">1</property>
+						<property name="row">0</property>
+					</layout>
+					</object></child>					
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">dB</property>
+					<layout>
+						<property name="column">2</property>
+						<property name="row">0</property>
+					</layout>
+					</object></child>
+
+
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Stopband lower edge</property>
+					<property name="xalign">1</property>
+					<layout>
+						<property name="column">0</property>
+						<property name="row">1</property>
+					</layout>
+					</object></child>
+					<child><object class="GtkEntry" id="butterworth_fs">
+					<property name="xalign">1</property>
+					<property name="max-length">9</property>
+					<property name="placeholder-text">fs</property>
+					<layout>
+						<property name="column">1</property>
+						<property name="row">1</property>
+					</layout>
+					</object></child>					
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Hz</property>
+					<layout>
+						<property name="column">2</property>
+						<property name="row">1</property>
+					</layout>
+					</object></child>
+
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Passband attenuation spread</property>
+					<property name="xalign">1</property>						
+					<layout>
+						<property name="column">0</property>
+						<property name="row">2</property>
+					</layout>
+					</object></child>
+					<child><object class="GtkEntry" id="butterworth_ap">
+					<property name="max-length">9</property>
+					<property name="placeholder-text">pa</property>
+					<property name="xalign">1</property>
+					<layout>
+						<property name="column">1</property>
+						<property name="row">2</property>
+					</layout>
+					</object></child>					
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">dB</property>
+					<layout>
+						<property name="column">2</property>
+						<property name="row">2</property>
+					</layout>
+					</object></child>
+
+
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Passband upper edge</property>
+					<property name="xalign">1</property>
+					<layout>
+						<property name="column">0</property>
+						<property name="row">3</property>
+					</layout>
+					</object></child>
+					<child><object class="GtkEntry" id="butterworth_fp">
+					<property name="xalign">1</property>
+					<property name="max-length">9</property>
+					<property name="placeholder-text">pf</property>
+					<layout>
+						<property name="column">1</property>
+						<property name="row">3</property>
+					</layout>
+					</object></child>					
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Hz</property>
+					<layout>
+						<property name="column">2</property>
+						<property name="row">3</property>
+					</layout>
+					</object></child>
+
+					<child><object class="GtkLabel">
+					<property name="label" translatable="yes">Filter order</property>
+					<property name="xalign">1</property>
+					<layout>
+						<property name="column">0</property>
+						<property name="row">4</property>
+					</layout>
+					</object></child>
+					<child><object class="GtkSpinButton" id="filter_order">
+						<property name="halign">start</property>
+						<property name="width-chars">3</property>
+						<property name="adjustment">order_adjustment</property>
+						<property name="climb-rate">1</property>
+						<property name="digits">0</property>
+						<property name="numeric">1</property>
+						<property name="xalign">1</property>
+					<layout>
+						<property name="column">1</property>
+						<property name="row">4</property>
+					</layout>
+					</object></child>
+
+
+				</object></child>		
+			</object></child>
+		
+	</object>
+
+</interface>

@@ -108,6 +108,8 @@ struct plt_chart {
 struct plt_line_info {
 	uint32_t nseg; /* number of segments */
 	uint32_t nmax; /* maximum number of allocated segments */
+	struct plt_point min;
+	struct plt_point max;
 };
 
 union plt_data_info {
@@ -138,7 +140,7 @@ struct plt_series {
 	void * data;
 };
 
-#define PLT_SERIES_MAX 64
+#define PLT_SERIES_MAX 16
 
 struct plt_series_lst {
 	uint32_t cnt;

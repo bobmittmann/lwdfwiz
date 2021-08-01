@@ -37,11 +37,13 @@
 #ifndef __LWDF_H__
 #define __LWDF_H__
 
-#include <stdio.h>
-#include <math.h>
+#include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#include <math.h>
+#include <stdio.h>
+#include <complex.h>
 
 enum lwdf_type {
 	LWDF_BUTTW = 1, /* Butterworth */
@@ -50,7 +52,7 @@ enum lwdf_type {
 };
 
 /* max filter order */
-#define LWDF_NMAX 127
+#define LWDF_ORDER_MAX 127
 
 /* Input to the filter generator */
 struct lwdfwiz_param {
@@ -76,7 +78,8 @@ struct lwdfwiz_param {
 /* Output from the filter generator */
 struct lwdf_info {
 	double samplerate;
-	double gamma[LWDF_NMAX];	
+	unsigned int order;
+	double gamma[LWDF_ORDER_MAX];	
 };
 
 struct lwdfwiz_cfg {
@@ -86,6 +89,16 @@ struct lwdfwiz_cfg {
 	char cfname[256];
 	char jlfname[256];
 };
+
+
+/* Floating point single precision filter */
+struct lwdf_fp32;
+
+/* Floating point double precision filter */
+struct lwdf_fp64;
+
+/* Filter frequency response analysis */
+struct lwdf_fp64_freq;
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,6 +114,62 @@ int lwdf_cgen(FILE *fout, const char * prefix,
 int lwdf_jlgen(FILE *fout, const char * prefix, 
 			   const struct lwdfwiz_param * wiz, 
 			   const struct lwdf_info * inf);
+
+
+
+/* 
+ * Run time filters 
+ * */
+
+struct lwdf_fp64 *lwdf_fp64_new(double samplerate);
+
+int lwdf_fp64_free(struct lwdf_fp64 *flt);
+
+int lwdf_fp64_init(struct lwdf_fp64 * flt, double samplerate);
+
+ssize_t lwdf_fp64_gamma_set(struct lwdf_fp64 * flt, const double gamma[], size_t cnt);
+
+ssize_t lwdf_fp64_gamma_get(struct lwdf_fp64 * flt, double gamma[], size_t max);
+
+double lwdf_fp64_coeff_get(struct lwdf_fp64 * flt, unsigned int idx);
+
+void lwdf_fp64_coeff_set(struct lwdf_fp64 * flt, 
+						unsigned int idx, double coeff);
+
+double lwdf_fp64_samplerate_get(struct lwdf_fp64 * flt);
+
+int lwdf_fp64_reset(struct lwdf_fp64 * flt);
+
+
+struct lwdf_fp64_freq * lwdf_fp64_freq_new(struct lwdf_fp64 * flt, 
+										   size_t dft_n);
+
+void lwdf_fp64_freq_free(struct lwdf_fp64_freq * ffr);
+
+ssize_t lwdf_fp64_lowwpass_freq_resp(struct lwdf_fp64_freq * ffr,
+									 struct lwdf_fp64 * flt, 
+									 double * pw[],
+									 complex double * pz[]);
+
+ssize_t lwdf_fp64_freq_log_set(struct lwdf_fp64_freq * ffr, 
+							   double w0, double w1, ssize_t npts);
+
+ssize_t lwdf_fp64_freq_lin_set(struct lwdf_fp64_freq * ffr, 
+							   double w0, double w1, ssize_t npts);
+/* 
+ * Filtering 
+ *  These functions performs filtering over a vector
+ * */
+
+/* Low Pass */
+ssize_t lwdf_fp64_lowpass(struct lwdf_fp64 * flt, double y[], 
+						  const double x[], size_t len);
+/* High Pass */
+ssize_t lwdf_fp64_higpass(struct lwdf_fp64 * flt, double y[], 
+						  const double x[], size_t len);
+/* Split Band */
+ssize_t lwdf_fp64_splitband(struct lwdf_fp64 * flt, double y[], 
+							const double x[], size_t len);
 
 #ifdef  __cplusplus
 }

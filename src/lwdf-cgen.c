@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include "lwdf.h"
 
+#define LWDF_NMAX (LWDF_ORDER_MAX) 
+
 static double alpha(double g)
 {
 	double a;
@@ -58,7 +60,8 @@ static void adaptor(int i, int t, double g, char *in1, char *in2,
 	double a;
 
 	fprintf(f, "\n");
-	fprintf(f, "\t/* adaptor %2d: g = %.8f */\n ", i, g);
+	fprintf(f, "\t/* g[%d] = %.8f; */\n ", i, g);
+	fprintf(f, "\t/* lwd_adaptor(g[%d], %s, %s, &%s, &%s); */\n", i, in1, in2, out1, out2);
 
 	if (g == 0.0) {
 		fprintf(f, "\t%2s%-3s=%-7s;%28s%-3s=%-7s;\n", "", out1, in2, "",
@@ -276,35 +279,38 @@ int lwdf_cgen(FILE * fout, const char * prefix,
 
 	fprintf(fout, "\n\t/* Upper arm ------------ */\n");
 	if (id && (N <= 3))
-		fprintf(fout, "\t*o2=i1;\n");
+		fprintf(fout, "\t*o2 = i1;\n");
 
 	j = 0;
 	if (!id) {
 		if (N <= 3) {
-			adaptor(0, 0, inf->gamma[0], "i2 ", "st[0] ", "*o2", "st[0] ",
+			adaptor(0, 0, inf->gamma[0], "i2", "st[0]", "*o2", "st[0]",
 				fout, nbits);
 		} else {
 			j = rx;
-			adaptor(0, 0, inf->gamma[0], "i2 ", "st[0] ",
-				rx ? "x1 " : "x0 ", "st[0] ", fout, nbits);
+			adaptor(0, 0, inf->gamma[0], "i2", "st[0]",
+				rx ? "x1" : "x0", "st[0]", fout, nbits);
 		};
 	}
 
 	for (i = 3; i < N; i += 4) {
 		if (!id) {
-			sprintf(in1, "st[%2d]", i);
-			sprintf(in2, "st[%2d]", i + 1);
-			sprintf(out1, "x%-2d", rx ? (i + 1) % 2 : i + 1);
-			sprintf(out2, "st[%2d]", i + 1);
+			sprintf(in1, "st[%d]", i);
+			sprintf(in2, "st[%d]", i + 1);
+			sprintf(out1, "x%d", rx ? (i + 1) % 2 : i + 1);
+			sprintf(out2, "st[%d]", i + 1);
+
 			adaptor(i + 1, rx ? 0 : i + 1, inf->gamma[i + 1], in1, in2,
 				out1, out2, fout, nbits);
-			sprintf(in1, "x%-2d", rx ? j % 2 : j);
-			sprintf(in2, "x%-2d", rx ? (i + 1) % 2 : i + 1);
+
+			sprintf(in1, "x%d", rx ? j % 2 : j);
+			sprintf(in2, "x%d", rx ? (i + 1) % 2 : i + 1);
 			if ((i + 4) >= N)
 				sprintf(out1, "*o2");
 			else
-				sprintf(out1, "x%-2d", rx ? i % 2 : i);
-			sprintf(out2, "st[%2d]", i);
+				sprintf(out1, "x%d", rx ? i % 2 : i);
+			sprintf(out2, "st[%d]", i);
+
 			adaptor(i, rx ? 0 : i, inf->gamma[i], in1, in2, out1, out2,
 				fout, nbits);
 		} else {
@@ -313,58 +319,65 @@ int lwdf_cgen(FILE * fout, const char * prefix,
 			if (i == 3)
 				sprintf(in1, "i1 ");
 			else
-				sprintf(in1, "x%-2d", rx ? 0 : j);
-			sprintf(in2, "st[%2d]", k);
+				sprintf(in1, "x%d", rx ? 0 : j);
+			sprintf(in2, "st[%d]", k);
 			if ((i + 4) >= N)
 				sprintf(out1, "*o2");
 			else
-				sprintf(out1, "x%-2d", rx ? 0 : k);
-			sprintf(out2, "st[%2d]", k);
+				sprintf(out1, "x%d", rx ? 0 : k);
+			sprintf(out2, "st[%d]", k);
+
 			adaptor(i, rx ? 0 : i, inf->gamma[i], in1, in2, out1, out2,
 				fout, nbits);
 		}
 		j = i;
 	}
+
 	fprintf(fout, "\n\t/* Lower arm  -----------------  */\n");
 	if (N == 1) {
+		fprintf(fout, "\n");
 		if (!id)
-			fprintf(fout, " *o1=i1;\n");
+			fprintf(fout, "\t*o1 = i1;\n");
 		else
-			fprintf(fout, " *o1=i2;\n");
+			fprintf(fout, "\t*o1 = i2;\n");
 	}
 	for (i = 1; i < N; i += 4) {
 		if (!id) {
-			sprintf(in1, "st[%2d]", i);
-			sprintf(in2, "st[%2d]", i + 1);
-			sprintf(out1, "x%-2d", rx ? (i + 1) % 2 : i + 1);
-			sprintf(out2, "st[%2d]", i + 1);
+			sprintf(in1, "st[%d]", i);
+			sprintf(in2, "st[%d]", i + 1);
+			sprintf(out1, "x%d", rx ? (i + 1) % 2 : i + 1);
+			sprintf(out2, "st[%d]", i + 1);
+			
 			adaptor(i + 1, rx ? 0 : i + 1, inf->gamma[i + 1], in1, in2,
 				out1, out2, fout, nbits);
+
 			if (i == 1)
-				sprintf(in1, "i1 ");
+				sprintf(in1, "i1");
 			else
-				sprintf(in1, "x%-2d", rx ? j % 2 : j);
-			sprintf(in2, "x%-2d", rx ? (i + 1) % 2 : i + 1);
+				sprintf(in1, "x%d", rx ? j % 2 : j);
+			sprintf(in2, "x%d", rx ? (i + 1) % 2 : i + 1);
 			if ((i + 4) >= N)
 				sprintf(out1, "*o1");
 			else
-				sprintf(out1, "x%-2d", rx ? i % 2 : i);
-			sprintf(out2, "st[%2d]", i);
+				sprintf(out1, "x%d", rx ? i % 2 : i);
+			sprintf(out2, "st[%d]", i);
+
 			adaptor(i, rx ? 0 : i, inf->gamma[i], in1, in2, out1, out2,
 				fout, nbits);
 		} else {
 			k = rl[i];
 
 			if (i == 1)
-				sprintf(in1, "i2 ");
+				sprintf(in1, "i2");
 			else
-				sprintf(in1, "x%-2d", rx ? 0 : j);
-			sprintf(in2, "st[%2d]", k);
+				sprintf(in1, "x%d", rx ? 0 : j);
+			sprintf(in2, "st[%d]", k);
 			if ((i + 4) >= N)
 				sprintf(out1, "*o1");
 			else
-				sprintf(out1, "x%-2d", rx ? 0 : k);
-			sprintf(out2, "st[%2d]", k);
+				sprintf(out1, "x%d", rx ? 0 : k);
+			sprintf(out2, "st[%d]", k);
+
 			adaptor(i, rx ? 0 : i, inf->gamma[i], in1, in2, out1, out2,
 				fout, nbits);
 		}

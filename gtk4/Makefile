@@ -19,11 +19,22 @@
 
 PROG = glwdf
 
-CFILES = ../src/vec-fp64.c ../src/lwdf-fp64.c ../src/lwdf-fp64-freq.c \
-	plot/plot-color.c plot/plot-figure.c plot/plot-series.c \
-	plot/plot-freqresp.c plot/plot-gtk.c \
-	glwdf-freq.c glwdf-time.c glwdf-app.c 
+#CFILES = glwdf-app.c glwdf-freq.c glwdf-time.c ../src/lwdf-fp64.c \
+	plot/plot-figure.c plot/plot-series.c plot/plot-freqresp.c plot/plot-gtk.c 
+CFILES = glwdf-application_window.c \
+		 glwdf-assistant.c \
+		 glwdf-filter_control.c glwdf-filter_view.c \
+		 glwdf-frequency_control.c\
+		 glwdf-app.c glwdf-about.c resources.c 
 
+UIFILES = ui/toolbars.ui ui/menus.ui ui/glwdf-application_window.ui \
+		  ui/glwdf-filter_control.ui ui/glwdf-filter_view.ui \
+		  ui/glwdf-frequency_control.ui  \
+		  ui/glwdf-assistant_butterworth.ui
+
+SVGFILES = icons/scalable/apps/glwdf-app.svg
+
+#	glwdf-frequency_control.c glwdf-frequency_view.c 
 OFILES = $(CFILES:.c=.o)
 
 LIBS = m pthread
@@ -33,16 +44,16 @@ LIBPATH =
 
 DBGOPTS = -g 
 
-OPTIONS	= $(DBGOPTS) -DDEBUG=1
+OPTIONS	= $(DBGOPTS)
 #OPTIONS	= $(DBGOPTS) -mno-cygwin
 
 #GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 
-GTKLIB = `pkg-config --libs gtk+-3.0`
-GTKCFLAGS = `pkg-config --cflags gtk+-3.0` 
+GTKLIB = `pkg-config --libs gtk4`
+GTKCFLAGS = `pkg-config --cflags gtk4` 
 
 SFLAGS	= -Wall
-CFLAGS	= -Wall -Ofast
+CFLAGS	= -Wall -O1
 LDFLAGS	= $(GTKLIB) -export-dynamic
 
 CC	= gcc
@@ -52,12 +63,14 @@ AR	= ar
 OBJCOPY	= objcopy
 OBJDUMP	= objdump
 STRIP = strip
+GLIB_COMPILE_RESOURCES = glib-compile-resources
 
 all: Makefile $(PROG) 
 #$(PROG).lst
 
 clean:
 	@rm -fv $(OFILES) $(PROG).lst $(PROG) $(PROG).exe
+	@rm -fv resources.c
 	@rm -fv *.png *.plt *.dat
 
 $(PROG): Makefile $(OFILES)
@@ -65,6 +78,14 @@ $(PROG): Makefile $(OFILES)
 
 $(PROG).lst: $(PROG) Makefile
 	$(OBJDUMP) -w -D -t -S -r -z $< | sed '/^[0-9,a-f]\{8\} .[ ]*d[f]\?.*$$/d' > $@
+
+glwdf.gresource: glwdf.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies glwdf.gresource.xml)
+
+resources.c: glwdf.gresource.xml glwdf.gresource
+	$(GLIB_COMPILE_RESOURCES) $< --target=$@ --generate-source
+
+resources.h: glwdf.gresource.xml glwdf.gresource
+	$(GLIB_COMPILE_RESOURCES) $< --target=$@ --generate-header
 
 %.o : %.c Makefile
 	$(CC) $(OPTIONS) $(CFLAGS) $(addprefix -I,$(INCPATH)) $(GTKCFLAGS) -o $@ -c $<

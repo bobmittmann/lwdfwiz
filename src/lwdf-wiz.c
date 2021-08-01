@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include "lwdf.h"
 
+#define LWDF_NMAX (LWDF_ORDER_MAX) 
+
 int readln(char * buf, unsigned int max);
 
 int input_double(const char * prompt, double * pval)
@@ -186,14 +188,14 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 		printf(" ... passband upper edge %.1f [Hz]\n", fp);
 	} else {
 		do {
-			input_double(" - <as> passband attenuation spread [dB]? ", &ap);
+			input_double(" - <ap> passband attenuation spread [dB]? ", &ap);
 		} while (ap > 100.0);
 
 		/* as = 10.0*log(1.0+es*es) / log(10.0); */
 		ep = sqrt(exp(log(10.0) * (ap / 10.0)) - 1.0);	
 
 		do {
-			input_double(" - <fp> fp passband upper edge [Hz]? ", &fp);
+			input_double(" - <fp> passband upper edge [Hz]? ", &fp);
 		} while (fp >= F/2.0);
 
 		/* passband transformed frequency */
@@ -294,15 +296,18 @@ int lwdfwiz_term(struct lwdfwiz_param * wiz, struct lwdf_info * inf)
 		if (kp < 0.0)
 			t = -t;
 		i2 = floor(t);
-		for (i = i1; i <= i2; i++)
-			printf(" ... set g = 2^%2d = %f (half coeffs, no mul)\n", i,
-			       exp(log(2.0) * (double)i));
 
-		g = ks;
+		g = ks + (kp - ks) / 2.0;
+
+		for (i = i1; i <= i2; ++i) {
+			double q = exp(log(2.0) * (double)i);
+			printf(" ... set g = 2^%2d = %g (half coeffs, no mul)\n", i, q);
+		}
+
 		do {
-			sprintf(s, " - < g> (%f better passband to %f better stopband)? ", ks, kp);
+			sprintf(s, " - < g> (%g better passband to %g better stopband)? ", ks, kp);
 			input_double(s, &g);
-		} while ((g < 0.0) || (g > kp));
+		} while ((g < ks) || (g > kp));
 
 		if (g == 0.0) {	
 			/* Butterworth bireciprocal */

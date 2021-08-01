@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<template class="GlwdfApplicationWindow" parent="GtkApplicationWindow">
+		<property name="title" translatable="yes">Gnu Digital Filter Workbench</property>
+		<property name="default-width">200</property>
+		<property name="default-height">200</property>
+		<property name="icon-name">glwdf-app</property>
+		<child>	<object class="GtkGrid">
+
+			<child> <object class="GtkBox" id="toolbar">
+
+				<property name="orientation">horizontal</property>
+				<property name="accessible-role">toolbar</property>
+				<property name="css-classes">toolbar</property>
+				<accessibility>
+					<property name="label">Toolbar</property>
+				</accessibility>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">New</property>
+					<property name="tooltip-text" translatable="yes">Create a new file</property>
+					<property name="icon-name">document-new</property>
+					<property name="action-name">app.new</property>
+				</object></child>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">Open</property>
+					<property name="tooltip-text" translatable="yes">Open a file</property>
+					<property name="icon-name">document-open</property>
+					<property name="action-name">app.open</property>
+				</object></child>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">Save</property>
+					<property name="tooltip-text" translatable="yes">Save a file</property>
+					<property name="icon-name">document-save</property>
+					<property name="action-name">app.save</property>
+				</object></child>
+				
+				<child><object class="GtkSeparator"/></child>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">Copy</property>
+					<property name="tooltip-text" translatable="yes">Copy selected object into the clipboard</property>
+					<property name="icon-name">edit-copy</property>
+					<property name="action-name">win.copy</property>
+				</object></child>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">Cut</property>
+					<property name="tooltip-text" translatable="yes">Cut selected object into the clipboard</property>
+					<property name="icon-name">edit-cut</property>
+					<property name="action-name">win.cut</property>
+				</object></child>
+				<child><object class="GtkButton">
+					<property name="label" translatable="yes">Paste</property>
+					<property name="tooltip-text" translatable="yes">Paste object from the clipboard</property>
+					<property name="icon-name">edit-paste</property>
+					<property name="action-name">win.paste</property>
+				</object></child>
+				
+				<child><object class="GtkSeparator"/></child>
+				
+				<child>	<object class="GtkButton">
+					<property name="label" translatable="yes">Close</property>
+					<property name="tooltip-text" translatable="yes">Close this window</property>					
+					<property name="icon-name">window-close</property>
+					<property name="action-name">win.close</property>
+				</object> </child>
+
+
+				<child>	<object class="GtkButton">
+					<property name="label" translatable="yes">Quit</property>
+					<property name="tooltip-text" translatable="yes">Quit the application</property>					
+					<property name="icon-name">application-exit</property>
+					<property name="action-name">app.quit</property>
+				</object> </child>
+
+				<child> <object class="GtkBox" id="toolbar">
+					<property name="orientation">horizontal</property>
+					<property name="accessible-role">toolbar</property>
+					<property name="css-classes">toolbar</property>
+				
+					<child>	<object class="GtkSeparator"/> </child>
+				
+					<child>	<object class="GtkButton">
+						<property name="label" translatable="yes">Wizard</property>
+						<property name="tooltip-text" translatable="yes">Open the Filter Design Assistant</property>						
+						<property name="icon-name">applications-other</property>
+						<property name="action-name">win.assistant</property>
+
+						
+					</object> </child>
+
+
+				
+				</object> </child>
+
+
+				<layout>
+					<property name="column">0</property>
+					<property name="row">0</property>
+				</layout>
+			</object> </child>
+		
+		
+			<child> <object class="GtkPaned" id="paned1">
+				<property name="position">280</property>
+				<property name="position-set">True</property>
+				<property name="wide-handle">True</property>
+				<child>	<object class="GtkGrid">
+					<child>	<object class="GtkStack" id="ctrl_stack">
+						<child> <object class="GtkStackPage">
+							<property name="name">page1</property>
+							<property name="title" translatable="yes">Filter Design Tool</property>
+							<property name="child">
+								<object class="GlwdfFilterControl" id="filter_ctrl"/>
+							</property>
+						</object> </child>							
+						<child> <object class="GtkStackPage">
+							<property name="name">page2</property>
+							<property name="title" translatable="yes">Frequency Control</property>
+							<property name="child">
+								<object class="GlwdfFrequencyControl" id="freq_ctrl"/>
+							</property>
+						</object> </child>
+						<child> <object class="GtkStackPage">
+							<property name="name">page3</property>
+							<property name="title" translatable="yes">TimeControl</property>
+							<property name="child">
+								<object class="GtkGrid" id="time_ctrl">
+								</object>
+							</property>
+						</object> </child>
+						<child>	<object class="GtkStackPage">
+							<property name="name">page4</property>
+							<property name="title" translatable="yes">Code Control</property>
+							<property name="child">
+								<object class="GtkGrid" id="code_ctrl">
+								</object>
+							</property>						
+						</object> </child>
+					
+						<layout>
+							<property name="column">0</property>
+							<property name="row">1</property>
+						</layout>
+					</object> </child>							
+				</object> </child>
+		
+				<child>	<object class="GtkGrid">
+					<child> <object class="GtkStackSwitcher" id="tool_ctl">
+						<property name="stack">view_stack</property>
+						<property name="halign">center</property>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">0</property>
+						</layout>
+					</object> </child>
+				
+				
+					<child>	<object class="GtkStack" id="view_stack">
+						<child> <object class="GtkStackPage">
+							<property name="name">page0</property>
+							<property name="title" translatable="yes">Filter Design</property>
+							<property name="child">
+								<object class="GlwdfFilterView" id="filter_view"/>
+							</property>
+						</object></child>
+						<child><object class="GtkStackPage">
+							<property name="name">page1</property>
+							<property name="title" translatable="yes">Frequency</property>
+							<property name="child">
+								<object class="GtkDrawingArea" id="freq_view">
+								</object>
+							</property>
+						</object> </child>
+						<child> <object class="GtkStackPage">
+							<property name="name">page3</property>
+							<property name="title" translatable="yes">Time</property>
+							<property name="child">
+								<object class="GtkDrawingArea" id="time_view">
+								</object>
+							</property>
+						</object> </child>
+						<child>	<object class="GtkStackPage">
+							<property name="name">page4</property>
+							<property name="title" translatable="yes">Code</property>
+							<property name="child">
+								<object class="GtkScrolledWindow">
+								<property name="has-frame">1</property>
+								<child>	<object class="GtkTextView" id="code_view">
+									<property name="hexpand">1</property>
+									<property name="vexpand">1</property>
+									<property name="buffer">buffer</property>
+									</object>
+								</child> </object>
+							</property>
+						</object> </child>					
+						<layout>
+							<property name="column">0</property>
+							<property name="row">1</property>
+						</layout>
+					</object> </child>							
+				</object> </child>
+				<layout>
+					<property name="column">0</property>
+					<property name="row">1</property>
+				</layout>
+				</object> </child>
+				
+				
+			<child> <object class="GtkStatusbar" id="status">
+				<property name="hexpand">1</property>
+				<layout>
+					<property name="column">0</property>
+					<property name="row">2</property>
+				</layout>
+			</object> </child>
+		</object> </child>		
+	</template>
+	
+	
+	<object class="GtkTextBuffer" id="buffer">
+		<signal name="changed" handler="update_statusbar"/>
+		<signal name="mark-set" handler="mark_set_callback"/>
+	</object>
+	
+</interface>

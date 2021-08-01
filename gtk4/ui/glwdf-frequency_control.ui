@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+
+	<template class="GlwdfFrequencyControl" parent="GtkBox">
+		<property name="can-focus">False</property>
+		<property name="margin-start">6</property>
+		<property name="margin-end">6</property>
+		<property name="margin-top">6</property>
+		<property name="margin-bottom">6</property>
+    
+		<child><object class="GtkFrame">
+			
+			<child><object class="GtkGrid" id="grid">				
+				<property name="margin-start">6</property>
+				<property name="margin-end">6</property>
+				<property name="margin-top">6</property>
+				<property name="margin-bottom">6</property>			
+				<property name="row-spacing">8</property>
+				<property name="column-spacing">8</property>
+
+					<child><object class="GtkLabel">
+						<property name="label" translatable="yes">Sample Rate:</property>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">0</property>
+						</layout>
+					</object></child>
+					<child><object class="GtkSpinButton">
+						<property name="adjustment">adjustment1</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">0</property>
+						</layout>
+					</object></child>
+					
+					<child><object class="GtkLabel">
+						<property name="label" translatable="yes">[Hz]</property>
+						<layout>
+							<property name="column">2</property>
+							<property name="row">0</property>
+						</layout>
+					</object></child>
+
+
+				
+			</object></child>
+		</object></child>			
+	</template>
+	
+	<object class="GtkAdjustment" id="adjustment1">
+		<property name="upper">88200</property>
+		<property name="value">88200</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+</interface>
